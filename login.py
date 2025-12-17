@@ -1,42 +1,37 @@
 import tkinter as tk
 from tkinter import messagebox
-import sqlite3
+from database import get_connection
+from menu_main import open_menu_main
 
-def login():
-    user = entry_user.get()
-    pwd = entry_pass.get()
+def open_login_screen(root):
+    for w in root.winfo_children():
+        w.destroy()
 
-    conn = sqlite3.connect("crm.db")
-    cursor = conn.cursor()
-    cursor.execute(
-        "SELECT * FROM users WHERE username=? AND password=?",
-        (user, pwd)
-    )
-    result = cursor.fetchone()
-    conn.close()
+    root.title("Login")
 
-    if result:
-        messagebox.showinfo("Login", "Success")
-        open_dashboard()
-    else:
-        messagebox.showerror("Login", "Invalid login")
+    tk.Label(root, text="Username").pack(pady=5)
+    entry_user = tk.Entry(root)
+    entry_user.pack()
 
-def open_dashboard():
-    dash = tk.Toplevel(root)
-    dash.title("CRM Dashboard")
-    tk.Label(dash, text="Welcome to CRM").pack(padx=20, pady=20)
+    tk.Label(root, text="Password").pack(pady=5)
+    entry_pass = tk.Entry(root, show="*")
+    entry_pass.pack()
 
-root = tk.Tk()
-root.title("CRM Login")
+    def login_action():
+        user = entry_user.get()
+        pwd = entry_pass.get()
 
-tk.Label(root, text="Username").pack()
-entry_user = tk.Entry(root)
-entry_user.pack()
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE username=? AND password=?", (user, pwd))
+        result = cursor.fetchone()
+        conn.close()
 
-tk.Label(root, text="Password").pack()
-entry_pass = tk.Entry(root, show="*")
-entry_pass.pack()
+        if result:
+            messagebox.showinfo("Success", "Logged in")
+            open_menu_main(root)
+        else:
+            messagebox.showerror("Error", "Invalid credentials")
 
-tk.Button(root, text="Login", command=login).pack(pady=10)
+    tk.Button(root, text="Login", command=login_action).pack(pady=10)
 
-root.mainloop()
