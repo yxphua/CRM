@@ -7,7 +7,6 @@ def setup_database():
     conn = get_connection()
     cursor = conn.cursor()
 
-    # Users table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -16,18 +15,28 @@ def setup_database():
         )
     """)
 
-    # Members table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS members (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            phone TEXT
+            name TEXT NOT NULL,
+            phone TEXT UNIQUE NOT NULL,
+            points INTEGER DEFAULT 0
         )
     """)
 
-    # Example login account
-    cursor.execute("INSERT OR IGNORE INTO users (username, password) VALUES (?, ?)",
-                   ("admin", "1234"))
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS transactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            phone TEXT,
+            amount REAL,
+            datetime TEXT
+        )
+    """)
+
+    cursor.execute(
+        "INSERT OR IGNORE INTO users (username, password) VALUES (?, ?)",
+        ("admin", "1234")
+    )
 
     conn.commit()
     conn.close()
