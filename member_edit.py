@@ -23,8 +23,8 @@ def open_edit_member(parent):
         name = entry_name.get()
         phone = entry_phone.get()
 
-        if not member_id:
-            messagebox.showerror("Error", "Enter ID")
+        if not member_id or not name or not phone:
+            messagebox.showerror("Error", "Enter all fields")
             return
 
         conn = get_connection()
