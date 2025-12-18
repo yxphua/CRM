@@ -9,29 +9,27 @@ def open_login_screen(root):
 
     root.title("Login")
 
-    tk.Label(root, text="Username").pack(pady=5)
-    entry_user = tk.Entry(root)
-    entry_user.pack()
+    tk.Label(root, text="Username").pack()
+    user = tk.Entry(root)
+    user.pack()
 
-    tk.Label(root, text="Password").pack(pady=5)
-    entry_pass = tk.Entry(root, show="*")
-    entry_pass.pack()
+    tk.Label(root, text="Password").pack()
+    pwd = tk.Entry(root, show="*")
+    pwd.pack()
 
-    def login_action():
-        user = entry_user.get()
-        pwd = entry_pass.get()
-
+    def login():
         conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users WHERE username=? AND password=?", (user, pwd))
-        result = cursor.fetchone()
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT * FROM users WHERE username=? AND password=?",
+            (user.get(), pwd.get())
+        )
+        result = cur.fetchone()
         conn.close()
 
         if result:
-            messagebox.showinfo("Success", "Logged in")
             open_menu_main(root)
         else:
-            messagebox.showerror("Error", "Invalid credentials")
+            messagebox.showerror("Error", "Invalid login")
 
-    tk.Button(root, text="Login", command=login_action).pack(pady=10)
-
+    tk.Button(root, text="Login", command=login).pack(pady=10)
