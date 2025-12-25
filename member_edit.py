@@ -29,11 +29,18 @@ def open_edit_member(parent):
 
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("UPDATE members SET name=?, phone=? WHERE id=?",
-                       (name, phone, member_id))
-        conn.commit()
-        conn.close()
 
-        messagebox.showinfo("Success", "Member updated")
+        cursor.execute(
+            "UPDATE members SET name=?, phone=? WHERE MemberId=?",
+            (name, phone, member_id)
+        )
+        conn.commit()
+
+        if cursor.rowcount == 0:
+            messagebox.showerror("Error", "Member not found")
+        else:
+            messagebox.showinfo("Success", "Member updated")
+
+        conn.close()
 
     tk.Button(win, text="Update", command=update_member).pack(pady=10)
