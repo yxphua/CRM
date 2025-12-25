@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import messagebox
 from database import get_connection
 from menu_main import open_menu_main
+import sqlite3
 
 def open_add_member(parent):
     win = tk.Toplevel(parent)
@@ -26,13 +27,26 @@ def open_add_member(parent):
 
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO members (name, phone) VALUES (?, ?)", (name, phone))
-        conn.commit()
-        conn.close()
 
-        messagebox.showinfo("Success", "Member Added")
-        load_member()
+        try:
+            cursor.execute(
+                "INSERT INTO members (name, phone) VALUES (?, ?)",
+                (name, phone)
+            )
+            conn.commit()
+            messagebox.showinfo("Success", "Member Added")
+            load_member()
 
+        except sqlite3.IntegrityError:
+            messagebox.showerror(
+                "Error",
+                "Member already exists"
+            )
+
+        finally:
+            conn.close()
+
+    # Button to add member
     tk.Button(win, text="Add Member", command=add).grid(row=2, column=0, columnspan=2, pady=10)
 
     # Listbox for member list
@@ -43,7 +57,7 @@ def open_add_member(parent):
         listbox.delete(0, tk.END)
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT id, name, phone FROM members")
+        cursor.execute("SELECT MemberId, name, phone FROM members")
         rows = cursor.fetchall()
         conn.close()
 
