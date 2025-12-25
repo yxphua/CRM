@@ -8,55 +8,61 @@ def open_pos_system(parent):
     win.title("POS System")
 
     tk.Label(win, text="Customer Name").grid(row=0, column=0)
-    name = tk.Entry(win)
-    name.grid(row=0, column=1)
+    entry_name = tk.Entry(win)
+    entry_name.grid(row=0, column=1)
 
     tk.Label(win, text="Phone").grid(row=1, column=0)
-    phone = tk.Entry(win)
-    phone.grid(row=1, column=1)
+    entry_phone = tk.Entry(win)
+    entry_phone.grid(row=1, column=1)
 
     tk.Label(win, text="Amount (RM)").grid(row=2, column=0)
-    amount = tk.Entry(win)
-    amount.grid(row=2, column=1)
+    entry_amount = tk.Entry(win)
+    entry_amount.grid(row=2, column=1)
 
     def submit():
-        if not name.get() or not phone.get() or not amount.get():
-            messagebox.showerror("Error", "All fields required")
-            return
+        name = entry_name.get()
+        phone = entry_phone.get()
 
         try:
-            amt = float(amount.get())
+            amt = float(entry_amount.get())
         except:
             messagebox.showerror("Error", "Invalid amount")
+            return
+
+        if not name or not phone:
+            messagebox.showerror("Error", "All fields required")
             return
 
         conn = get_connection()
         cur = conn.cursor()
 
-        # AUTO CREATE MEMBER IF NOT EXISTS
-        cur.execute("SELECT id FROM members WHERE phone=?", (phone.get(),))
+        # Find member by phone
+        cur.execute("SELECT MemberId FROM members WHERE phone=?", (phone,))
         member = cur.fetchone()
 
         if not member:
             cur.execute(
                 "INSERT INTO members (name, phone, points) VALUES (?, ?, ?)",
-                (name.get(), phone.get(), int(amt))
+                (name, phone, int(amt))
             )
+            member_id = cur.lastrowid
         else:
+            member_id = member[0]
             cur.execute(
-                "UPDATE members SET points = points + ? WHERE phone=?",
-                (int(amt), phone.get())
+                "UPDATE members SET points = points + ? WHERE MemberId=?",
+                (int(amt), member_id)
             )
 
+        # Save transaction using MemberId
         cur.execute(
-            "INSERT INTO transactions (phone, amount, datetime) VALUES (?, ?, ?)",
-            (phone.get(), amt, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+            "INSERT INTO transactions (MemberId, amount, datetime) VALUES (?, ?, ?)",
+            (member_id, amt, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         )
 
         conn.commit()
         conn.close()
 
-        messagebox.showinfo("Success", "Transaction saved & points updated")
+        messagebox.showinfo("Success", "Transaction saved")
 
-    tk.Button(win, text="Submit Transaction",
-              command=submit).grid(row=3, column=0, columnspan=2, pady=10)
+    tk.Button(win, text="Submit", command=submit)\
+        .grid(row=3, column=0, columnspan=2, pady=10)
