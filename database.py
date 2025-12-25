@@ -9,7 +9,7 @@ def setup_database():
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            Id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE,
             password TEXT
         )
@@ -17,7 +17,7 @@ def setup_database():
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS members (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            MemberId INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             phone TEXT UNIQUE NOT NULL,
             points INTEGER DEFAULT 0
@@ -26,10 +26,11 @@ def setup_database():
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS transactions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            phone TEXT,
+            TransId INTEGER PRIMARY KEY AUTOINCREMENT,
+            MemberId INTEGER,
             amount REAL,
-            datetime TEXT
+            datetime TEXT,
+            FOREIGN KEY (MemberId) REFERENCES members(MemberId)
         )
     """)
 
