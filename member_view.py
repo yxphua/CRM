@@ -9,7 +9,7 @@ def open_view_member(parent):
 
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, name, phone FROM members")
+    cursor.execute("SELECT MemberId, name, phone FROM members")
     rows = cursor.fetchall()
     conn.close()
 
